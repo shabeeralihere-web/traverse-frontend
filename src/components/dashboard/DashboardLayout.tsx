@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import {
   LayoutDashboard,
@@ -57,7 +57,7 @@ const operatorLinks = [
   },
 ];
 
-export default function DashboardLayout({
+function DashboardLayoutContent({
   children,
   role,
 }: DashboardLayoutProps) {
@@ -114,6 +114,7 @@ export default function DashboardLayout({
     if (!sidebarOpen) return;
 
     const previousOverflow = document.body.style.overflow;
+
     document.body.style.overflow = "hidden";
 
     const handleEscape = (event: KeyboardEvent) => {
@@ -275,5 +276,21 @@ export default function DashboardLayout({
         {navigation}
       </aside>
     </div>
+  );
+}
+
+export default function DashboardLayout(props: DashboardLayoutProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <p className="text-sm text-gray-500">
+            Loading dashboard...
+          </p>
+        </div>
+      }
+    >
+      <DashboardLayoutContent {...props} />
+    </Suspense>
   );
 }
