@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -6,24 +5,24 @@ import { useEffect } from "react";
 
 const benefits = [
   {
-    title: "Discover new places",
+    title: "Discover places worth visiting",
     description:
-      "Find interesting destinations and experiences worth exploring.",
+      "Explore interesting destinations and find experiences that make you want to travel.",
   },
   {
-    title: "Find your kind of adventure",
+    title: "Find experiences you'll love",
     description:
-      "Choose from exciting adventures, peaceful escapes, and memorable activities.",
+      "From exciting adventures to peaceful escapes, discover journeys that match your interests.",
   },
   {
-    title: "Save your favourites",
+    title: "Keep your favourites close",
     description:
-      "Keep the tours you love in one place and come back whenever you're ready.",
+      "Save the tours that catch your attention and return to them whenever you're ready.",
   },
   {
-    title: "Book with ease",
+    title: "Make planning easier",
     description:
-      "Check tour availability and manage your bookings in one place.",
+      "Check available tours, explore schedules, and keep your bookings organised in one place.",
   },
 ];
 
@@ -48,225 +47,237 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
+  const primaryButton =
+    "inline-flex min-h-11 items-center justify-center rounded-md bg-[#14532d] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#0f4224]";
+
+  const secondaryButton =
+    "inline-flex min-h-11 items-center justify-center rounded-md border border-[#d8d8d8] px-7 py-3 text-sm font-semibold text-[#171717] transition duration-300 hover:border-[#14532d] hover:text-[#14532d]";
+
+  const textLink =
+    "font-semibold text-[#14532d] transition-colors duration-200 hover:text-[#0f4224] hover:underline";
+
   return (
     <main className="overflow-hidden bg-white text-[#171717]">
-      {/* Hero */}
-      <section className="px-6 py-16 text-center sm:py-20">
+
+      {/* Hero Section */}
+      <section className="px-6 py-20 text-center sm:py-24">
         <div className="mx-auto max-w-4xl">
-          <p className="reveal mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#267448]">
-            Discover experiences with Traverse
-          </p>
 
           <h1 className="reveal font-[family-name:var(--font-outfit)] text-4xl font-bold leading-[1.1] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
             Your next journey
             <br />
             begins with{" "}
-            <span className="text-[#267448]">Traverse.</span>
+            <span className="text-[#14532d]">Traverse.</span>
           </h1>
 
-          <p className="reveal mx-auto mt-5 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
+          <p className="reveal mx-auto mt-6 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
             Discover extraordinary destinations, explore exciting
-            experiences, and find new reasons to travel. Your next
-            memorable journey starts here.
+            experiences, and find new reasons to travel. Whether
+            you're looking for adventure, relaxation, or something
+            completely different, your next memorable journey
+            starts here.
           </p>
 
-          <div className="reveal mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/tours"
-              className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#171717] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#267448]"
-            >
-              Explore tours
+          <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/tours" className={primaryButton}>
+              Explore Tours
             </Link>
 
-            <Link
-              href="/register"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-[#d8d8d8] px-7 py-3 text-sm font-semibold text-[#171717] transition duration-300 hover:border-[#267448] hover:text-[#267448]"
-            >
-              Create an account
+            <Link href="/register" className={secondaryButton}>
+              Create an Account
             </Link>
           </div>
 
-          <p className="reveal mt-4 text-sm text-[#777777]">
-            Already a member?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-[#267448] hover:underline"
-            >
+          <p className="reveal mt-5 text-sm text-[#777777]">
+            Already have an account?{" "}
+            <Link href="/login" className={textLink}>
               Login
             </Link>
           </p>
+
         </div>
       </section>
 
-      {/* Introduction */}
-      <section className="px-6 py-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="reveal mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#267448]">
-            Explore something different
-          </p>
-
-          <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold tracking-[-0.035em] sm:text-4xl">
-            More than just a destination.
-          </h2>
-
-          <p className="reveal mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
-            Every journey has a story waiting to unfold. Discover
-            hidden places, experience something new, and create
-            memories that stay with you long after the journey ends.
-          </p>
-        </div>
-      </section>
-
-      {/* Featured tours introduction */}
-      <section className="px-6 py-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="reveal mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#267448]">
-            Find your next experience
-          </p>
-
-          <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold tracking-[-0.035em] sm:text-4xl">
-            Where will your next journey take you?
-          </h2>
-
-          <p className="reveal mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
-            From exciting adventures to relaxing escapes, explore
-            experiences that match your interests and make every
-            trip worth remembering.
-          </p>
-
-          <Link
-            href="/tours"
-            className="reveal mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-[#171717] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#267448]"
-          >
-            View all tours
-          </Link>
-        </div>
-      </section>
-
-      {/* Benefits */}
-      <section className="px-6 py-12">
+      {/* Introduction Section */}
+      <section className="px-6 py-16">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-8 text-center">
-            <p className="reveal mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#267448]">
-              Your journey, made easier
-            </p>
 
-            <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold tracking-[-0.035em] sm:text-4xl">
-              Everything you need to get started.
+          <div className="max-w-3xl">
+            <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+              There's more to travel than just reaching a destination.
             </h2>
+
+            <p className="reveal mt-5 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
+              It's about the places you discover, the people you
+              meet, and the moments that stay with you. Traverse
+              brings exciting experiences closer to you, helping
+              you turn your travel ideas into journeys worth
+              remembering.
+            </p>
           </div>
 
-          <div className="grid gap-x-10 gap-y-7 sm:grid-cols-2">
+        </div>
+      </section>
+
+      {/* Featured Tours Introduction */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-5xl">
+
+          <div className="max-w-3xl">
+            <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+              Your next favourite place is waiting to be discovered.
+            </h2>
+
+            <p className="reveal mt-5 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
+              From peaceful getaways to unforgettable adventures,
+              explore a variety of experiences and find the one
+              that makes you excited for your next journey.
+            </p>
+
+            <Link
+              href="/tours"
+              className="reveal mt-7 inline-flex min-h-11 items-center justify-center rounded-md bg-[#14532d] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#0f4224]"
+            >
+              Discover All Tours
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-5xl">
+
+          <div className="mb-10 max-w-3xl">
+            <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+              Everything you need to make your next journey happen.
+            </h2>
+
+            <p className="reveal mt-4 text-sm leading-7 text-[#626262] sm:text-base">
+              Finding your next experience should be simple.
+              Discover, save, and plan your journeys with ease.
+            </p>
+          </div>
+
+          <div className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
             {benefits.map((item, index) => (
               <div
                 key={item.title}
-                className="reveal border-t border-[#e5e5e5] pt-4"
+                className="reveal border-t border-[#e5e5e5] pt-5"
                 style={{ transitionDelay: `${index * 90}ms` }}
               >
                 <h3 className="font-[family-name:var(--font-outfit)] text-lg font-semibold">
                   {item.title}
                 </h3>
 
-                <p className="mt-2 max-w-md text-sm leading-6 text-[#686868]">
+                <p className="mt-2 max-w-md text-sm leading-7 text-[#686868]">
                   {item.description}
                 </p>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
-      {/* Traveler account */}
-      <section className="px-6 py-12">
-        <div className="reveal mx-auto max-w-3xl border-y border-[#e5e5e5] py-9 text-center">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#267448]">
-            For travellers
-          </p>
+      {/* Traveler Section */}
+      <section className="px-6 py-16">
+        <div className="reveal mx-auto max-w-5xl border-y border-[#e5e5e5] py-12">
 
-          <h2 className="font-[family-name:var(--font-outfit)] text-3xl font-bold tracking-[-0.035em] sm:text-4xl">
-            Your next adventure starts here.
-          </h2>
+          <div className="max-w-3xl">
+            <h2 className="font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+              Every great journey starts with a first step.
+            </h2>
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#626262] sm:text-base">
-            Create your traveler account to save your favourite
-            tours, explore experiences, and manage your bookings
-            whenever you need.
-          </p>
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
+              Be part of Traverse and make your travel plans
+              more personal. Discover experiences, save the
+              tours you love, and manage your bookings whenever
+              you need. Your next adventure could be closer
+              than you think.
+            </p>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/register"
-              className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#171717] px-6 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#267448]"
-            >
-              Join as a traveller
-            </Link>
+            <div className="mt-7 flex flex-wrap items-center gap-4">
+              <Link href="/register" className={primaryButton}>
+                Join Traverse
+              </Link>
 
-            <Link
-              href="/login"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-[#d8d8d8] px-6 py-3 text-sm font-semibold text-[#171717] transition duration-300 hover:border-[#267448] hover:text-[#267448]"
-            >
-              Login
-            </Link>
+              <Link href="/login" className={secondaryButton}>
+                Traveler Login
+              </Link>
+            </div>
+
+            <p className="mt-5 text-sm text-[#777777]">
+              New to Traverse?{" "}
+              <Link href="/register" className={textLink}>
+                Create your free account
+              </Link>
+            </p>
           </div>
+
         </div>
       </section>
 
-      {/* Tour operators */}
-      <section className="px-6 py-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="reveal mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#267448]">
-            For tour operators
-          </p>
+      {/* Tour Operator Section */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-5xl">
 
-          <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold tracking-[-0.035em] sm:text-4xl">
-            Share your experiences with the world.
-          </h2>
+          <div className="max-w-3xl">
+            <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+              Have experiences worth sharing? Let more people discover them.
+            </h2>
 
-          <p className="reveal mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
-            Bring your tours to Traverse, connect with travellers,
-            and give more people the opportunity to discover what
-            you offer.
-          </p>
+            <p className="reveal mt-5 max-w-2xl text-sm leading-7 text-[#626262] sm:text-base">
+              Bring your tours and activities to Traverse and
+              connect with travellers searching for their next
+              experience. Showcase what makes your offerings
+              special, reach new audiences, and grow your
+              travel business with us.
+            </p>
 
-          <Link
-            href="/operator-register"
-            className="reveal mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-[#171717] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#267448]"
-          >
-            Become a partner
-          </Link>
-
-          <p className="reveal mt-4 text-sm text-[#777777]">
-            Already a partner?{" "}
             <Link
-              href="/login"
-              className="font-semibold text-[#267448] hover:underline"
+              href="/operator-register"
+              className="reveal mt-7 inline-flex min-h-11 items-center justify-center rounded-md bg-[#14532d] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#0f4224]"
             >
-              Login
+              Become a Tour Partner
             </Link>
-          </p>
+
+            <p className="reveal mt-5 text-sm text-[#777777]">
+              Already working with Traverse?{" "}
+              <Link href="/login" className={textLink}>
+                Partner Login
+              </Link>
+            </p>
+          </div>
+
         </div>
       </section>
 
-      {/* Final call to action */}
-      <section className="px-6 py-14 text-center">
+      {/* Final Call To Action */}
+      <section className="px-6 py-20 text-center">
         <div className="mx-auto max-w-3xl">
-          <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold tracking-[-0.035em] sm:text-4xl">
-            Ready to explore somewhere new?
+
+          <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+            The world is waiting. Where will you go next?
           </h2>
 
-          <p className="reveal mx-auto mt-4 max-w-xl text-sm leading-7 text-[#626262] sm:text-base">
-            Find your next experience and make your next journey
-            one to remember.
+          <p className="reveal mx-auto mt-5 max-w-xl text-sm leading-7 text-[#626262] sm:text-base">
+            Don't let your travel dreams remain just plans.
+            Discover new places, find experiences that excite
+            you, and start creating memories that last a lifetime.
           </p>
 
           <Link
             href="/tours"
-            className="reveal mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-[#171717] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#267448]"
+            className="reveal mt-8 inline-flex min-h-11 items-center justify-center rounded-md bg-[#14532d] px-8 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#0f4224]"
           >
-            Start exploring
+            Start Exploring
           </Link>
+
         </div>
       </section>
+
     </main>
   );
 }

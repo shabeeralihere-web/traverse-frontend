@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -6,21 +5,18 @@ import { useEffect } from "react";
 
 export default function AboutPage() {
   useEffect(() => {
-    const elements = document.querySelectorAll(".about-reveal");
+    const elements = document.querySelectorAll(".reveal");
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add("about-visible");
+            entry.target.classList.add("is-visible");
             observer.unobserve(entry.target);
           }
         });
       },
-      {
-        threshold: 0.12,
-        rootMargin: "0px 0px -40px 0px",
-      }
+      { threshold: 0.12 }
     );
 
     elements.forEach((element) => observer.observe(element));
@@ -28,277 +24,115 @@ export default function AboutPage() {
     return () => observer.disconnect();
   }, []);
 
+  const primaryButton =
+    "inline-flex min-h-11 items-center justify-center rounded-md bg-[#14532d] px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-[#0f4224]";
+
   return (
-    <main className="overflow-hidden bg-white text-traverse-dark">
+    <main className="overflow-hidden bg-white text-[#171717]">
 
-      {/* Hero */}
-      <section className="relative flex min-h-[620px] items-center px-6 py-28 md:min-h-[700px] md:py-36">
-        <div className="mx-auto w-full max-w-6xl">
-          <div className="max-w-5xl">
+      {/* Hero Section */}
+      <section className="px-6 py-24 sm:py-32">
+        <div className="mx-auto max-w-5xl">
 
-            <p className="about-reveal mb-8 text-xs font-bold uppercase tracking-[0.25em] text-traverse-primary">
-              GET TO KNOW TRAVERSE
-            </p>
+          <h1 className="reveal max-w-4xl font-[family-name:var(--font-outfit)] text-4xl font-bold leading-[1.12] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
+            Bringing people and
+            <br className="hidden sm:block" /> experiences
+            <span className="text-[#14532d]"> closer together.</span>
+          </h1>
 
-            <h1 className="about-reveal text-5xl font-semibold leading-[1.12] tracking-tight sm:text-6xl md:text-7xl lg:text-[88px]">
-              The world is full
-              <br />
-              of places to
-              <span className="text-traverse-primary">
-                {" "}experience.
-              </span>
-            </h1>
+          <p className="reveal mt-8 max-w-2xl text-base leading-8 text-[#626262] sm:text-lg">
+            Traverse is a tours and activities platform that helps
+            travellers discover experiences and connect with the
+            people who create them. We bring different travel
+            experiences together, making it easier to find your
+            next journey.
+          </p>
 
-            <div className="about-reveal mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-              <p className="max-w-xl text-base leading-8 text-gray-600 md:text-lg">
-                Traverse is a tours and activities booking platform
-                that brings travelers and experience providers
-                together. Discover new places, find experiences
-                worth exploring, and make your next journey happen.
-              </p>
-
-              <Link
-                href="/tours"
-                className="w-fit border-b-2 border-traverse-primary pb-2 text-sm font-semibold transition-colors hover:text-traverse-primary"
-              >
-                Discover experiences
-              </Link>
-            </div>
-
-          </div>
-        </div>
-
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-green-50 blur-3xl" />
-      </section>
-
-      {/* Main Story */}
-      <section className="px-6 pb-24 md:pb-36">
-        <div className="mx-auto max-w-6xl">
-
-          <div className="about-reveal grid gap-10 border-t border-gray-200 pt-10 md:grid-cols-[0.7fr_1.3fr] md:gap-20">
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-traverse-primary">
-                OUR STORY
-              </p>
-              <p className="mt-5 text-sm text-gray-400">
-                A simpler way to explore.
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl">
-                We believe every journey should begin with an easy discovery.
-              </h2>
-
-              <div className="mt-8 max-w-2xl space-y-6 text-base leading-8 text-gray-600">
-                <p>
-                  Planning an experience should be exciting, not
-                  complicated. Yet discovering the right tours,
-                  understanding the details, and finding available
-                  activities can take more effort than expected.
-                </p>
-
-                <p>
-                  That's where Traverse comes in. We are building
-                  a platform that brings different tours and
-                  activities into one place, helping travelers
-                  discover opportunities and make informed
-                  booking decisions.
-                </p>
-
-                <p>
-                  From outdoor adventures and nature escapes to
-                  cultural activities and guided experiences,
-                  we want to make exploring something new easier
-                  for everyone.
-                </p>
-              </div>
-            </div>
-
-          </div>
         </div>
       </section>
 
-      {/* Visual Statement */}
-      <section className="relative bg-green-950 px-6 py-24 text-white md:py-36">
-        <div className="mx-auto max-w-6xl">
+      {/* What We Do */}
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-5xl">
 
-          <div className="about-reveal max-w-5xl">
-            <p className="mb-8 text-xs font-bold uppercase tracking-[0.22em] text-green-300">
-              MORE THAN JUST A BOOKING PLATFORM
-            </p>
+          <div className="grid gap-10 md:grid-cols-2 md:gap-16">
 
-            <h2 className="text-4xl font-medium leading-tight tracking-tight sm:text-5xl md:text-7xl">
-              It's about the places you discover,
-              the people you meet,
-              and the memories you create.
+            <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+              Making travel discovery simple.
             </h2>
 
-            <p className="mt-10 max-w-2xl text-base leading-8 text-green-100/70 md:text-lg">
-              We want to make meaningful experiences easier to
-              discover by connecting travelers with the people
-              who make those experiences possible.
-            </p>
-          </div>
-
-          <div className="about-reveal mt-20 grid gap-10 border-t border-white/20 pt-10 sm:grid-cols-2">
-
-            <div>
-              <h3 className="text-xl font-semibold">
-                For travelers
-              </h3>
-              <p className="mt-4 max-w-md text-sm leading-7 text-green-100/70">
-                Discover experiences, explore tour details,
-                check availability, and book activities that
-                match your interests.
+            <div className="reveal">
+              <p className="text-base leading-8 text-[#626262]">
+                Finding the right experience can take time. Traverse
+                brings tours and activities into one place, so
+                travellers can explore destinations, discover
+                experiences, compare available options, and choose
+                journeys that interest them.
               </p>
-            </div>
 
-            <div>
-              <h3 className="text-xl font-semibold">
-                For experience providers
-              </h3>
-              <p className="mt-4 max-w-md text-sm leading-7 text-green-100/70">
-                A platform for approved tour operators to
-                showcase their experiences and connect with
-                travelers looking for something new.
+              <p className="mt-5 text-base leading-8 text-[#626262]">
+                We also give tour operators a platform to showcase
+                their experiences and connect with travellers who
+                are looking for something new.
               </p>
             </div>
 
           </div>
+
         </div>
       </section>
 
-      {/* Our Approach */}
-      <section className="px-6 py-24 md:py-36">
-        <div className="mx-auto max-w-6xl">
+      {/* Our Purpose */}
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-5xl border-y border-[#e5e5e5] py-16">
 
-          <div className="about-reveal max-w-3xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-traverse-primary">
-              THE TRAVERSE APPROACH
-            </p>
+          <div className="max-w-3xl">
 
-            <h2 className="mt-6 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl md:text-6xl">
-              Less time searching.
-              <span className="text-traverse-primary">
-                {" "}More time experiencing.
-              </span>
+            <h2 className="reveal font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-4xl">
+              More than finding a place. It's about the experience.
             </h2>
-          </div>
 
-          <div className="about-reveal mt-16 grid gap-12 border-t border-gray-200 pt-10 md:grid-cols-3">
-
-            <div>
-              <p className="text-sm font-semibold text-traverse-primary">
-                01
-              </p>
-              <h3 className="mt-5 text-xl font-semibold">
-                Discover
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-gray-600">
-                Explore different destinations, tours, and
-                activities in one convenient place.
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-traverse-primary">
-                02
-              </p>
-              <h3 className="mt-5 text-xl font-semibold">
-                Explore
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-gray-600">
-                Understand the itinerary, pricing, availability,
-                and important details before choosing an experience.
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-traverse-primary">
-                03
-              </p>
-              <h3 className="mt-5 text-xl font-semibold">
-                Experience
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-gray-600">
-                Book your preferred experience and look forward
-                to discovering something new.
-              </p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* Closing Story */}
-      <section className="border-t border-gray-200 px-6 py-24 md:py-36">
-        <div className="mx-auto max-w-6xl">
-
-          <div className="about-reveal grid gap-10 md:grid-cols-[0.7fr_1.3fr] md:gap-20">
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-traverse-primary">
-                LOOKING AHEAD
-              </p>
-            </div>
-
-            <div>
-              <h2 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl md:text-6xl">
-                We're here to make
-                exploring the world
-                a little easier.
-              </h2>
-
-              <p className="mt-8 max-w-2xl text-base leading-8 text-gray-600">
-                Our vision is to build a trusted place where
-                travelers can discover meaningful experiences
-                and local tour operators can share what makes
-                their destinations special.
-              </p>
-
-              <p className="mt-5 max-w-2xl text-base leading-8 text-gray-600">
-                Every great journey starts somewhere.
-                Let yours start with Traverse.
-              </p>
-
-              <Link
-                href="/tours"
-                className="mt-10 inline-flex border-b-2 border-traverse-primary pb-2 text-sm font-semibold transition-colors hover:text-traverse-primary"
-              >
-                Explore your next experience
-              </Link>
-            </div>
+            <p className="reveal mt-6 text-base leading-8 text-[#626262]">
+              We believe every journey begins with curiosity.
+              It could be an adventure in a new destination, a
+              peaceful escape, or an activity you've always wanted
+              to try. Our purpose is to make these experiences
+              easier to discover and help travellers turn their
+              ideas into memorable journeys.
+            </p>
 
           </div>
 
         </div>
       </section>
 
-      {/* Animation Styles */}
-      <style jsx global>{`
-        .about-reveal {
-          opacity: 0;
-          transform: translateY(32px);
-          transition:
-            opacity 800ms ease,
-            transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
-        }
+      {/* Closing Section */}
+      <section className="px-6 py-24 sm:py-28">
+        <div className="mx-auto max-w-5xl">
 
-        .about-reveal.about-visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
+          <div className="reveal max-w-3xl">
 
-        @media (prefers-reduced-motion: reduce) {
-          .about-reveal {
-            opacity: 1;
-            transform: none;
-            transition: none;
-          }
-        }
-      `}</style>
+            <h2 className="font-[family-name:var(--font-outfit)] text-3xl font-bold leading-tight tracking-[-0.035em] sm:text-5xl">
+              Your next experience is waiting to be discovered.
+            </h2>
+
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[#626262]">
+              Whether you're planning your next trip or sharing
+              experiences with others, start your journey with
+              Traverse.
+            </p>
+
+            <Link
+              href="/tours"
+              className={`${primaryButton} mt-8`}
+            >
+              Explore Tours
+            </Link>
+
+          </div>
+
+        </div>
+      </section>
 
     </main>
   );

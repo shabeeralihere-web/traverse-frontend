@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -132,6 +131,15 @@ export default function ToursPage() {
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Mobile-only state
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
+  const [mobileTours, setMobileTours] = useState<Tour[]>([]);
+
+  const requestedPageRef = useRef<number | null>(null);
+  const wasLoadingRef = useRef(false);
+  const loadedMobilePageRef = useRef<number | null>(null);
+
   const [saveModal, setSaveModal] = useState<
     "guest" | "restricted" | null
   >(null);
@@ -139,9 +147,31 @@ export default function ToursPage() {
   const [pendingTourId, setPendingTourId] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
 
+  // Use the accumulated list on mobile.
+  // Desktop continues using the original Redux results.
+  const displayedTours = isMobile ? mobileTours : publicTours;
+
   const isTourSaved = (tourId: string) =>
     savedTours.some((tour) => tour._id === tourId);
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 639px)");
+
+    const handleScreenChange = () => {
+      setIsMobile(mediaQuery.matches);
+    };
+
+    handleScreenChange();
+
+    mediaQuery.addEventListener("change", handleScreenChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleScreenChange);
+    };
+  }, []);
+
+  // Saved tours
   useEffect(() => {
     if (!initialized) return;
 
@@ -152,6 +182,7 @@ export default function ToursPage() {
     }
   }, [dispatch, initialized, isAuthenticated, user?.role]);
 
+  // Debounced search
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(filters.search.trim());
@@ -160,7 +191,14 @@ export default function ToursPage() {
     return () => window.clearTimeout(timeout);
   }, [filters.search]);
 
+  // Fetch tours
+  // Desktop uses the original page state.
+  // Mobile uses its own page state for Load More.
   useEffect(() => {
+    const requestPage = isMobile ? mobilePage : page;
+
+    requestedPageRef.current = requestPage;
+
     const request = dispatch(
       getPublishedTours({
         search: debouncedSearch || undefined,
@@ -173,7 +211,7 @@ export default function ToursPage() {
         minDuration: filters.minDuration || undefined,
         maxDuration: filters.maxDuration || undefined,
         sort: filters.sort,
-        page,
+        page: requestPage,
         limit: PAGE_SIZE,
       })
     );
@@ -183,6 +221,9 @@ export default function ToursPage() {
     };
   }, [
     dispatch,
+    isMobile,
+    mobilePage,
+    page,
     debouncedSearch,
     filters.destination,
     filters.activityType,
@@ -193,8 +234,57 @@ export default function ToursPage() {
     filters.minDuration,
     filters.maxDuration,
     filters.sort,
-    page,
   ]);
+
+  // Append mobile results after each successful request.
+  useEffect(() => {
+    if (isLoadingTours) {
+      wasLoadingRef.current = true;
+      return;
+    }
+
+    if (!wasLoadingRef.current) return;
+
+    wasLoadingRef.current = false;
+
+    if (error || !isMobile) return;
+
+    const completedPage = requestedPageRef.current;
+
+    if (
+      completedPage === null ||
+      loadedMobilePageRef.current === completedPage
+    ) {
+      return;
+    }
+
+    setMobileTours((previousTours) => {
+      // First page starts a fresh list.
+      if (completedPage === 1) {
+        return publicTours;
+      }
+
+      // Later pages are appended without duplicates.
+      const existingIds = new Set(
+        previousTours.map((tour) => tour._id)
+      );
+
+      const newTours = publicTours.filter(
+        (tour) => !existingIds.has(tour._id)
+      );
+
+      return [...previousTours, ...newTours];
+    });
+
+    loadedMobilePageRef.current = completedPage;
+  }, [publicTours, isLoadingTours, error, isMobile]);
+
+  // Reset accumulated mobile results when filters change.
+  const resetMobileResults = () => {
+    setMobilePage(1);
+    setMobileTours([]);
+    loadedMobilePageRef.current = null;
+  };
 
   const updateFilter = (key: keyof Filters, value: string) => {
     setFilters((current) => ({
@@ -203,12 +293,14 @@ export default function ToursPage() {
     }));
 
     setPage(1);
+    resetMobileResults();
   };
 
   const clearFilters = () => {
     setFilters(initialFilters);
     setDebouncedSearch("");
     setPage(1);
+    resetMobileResults();
   };
 
   const hasActiveFilters =
@@ -235,6 +327,37 @@ export default function ToursPage() {
     totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
 
   const showingTo = Math.min(page * PAGE_SIZE, totalCount);
+
+  // Retry current request
+  const handleRetry = () => {
+    const requestPage = isMobile ? mobilePage : page;
+
+    requestedPageRef.current = requestPage;
+
+    dispatch(
+      getPublishedTours({
+        page: requestPage,
+        limit: PAGE_SIZE,
+        search: debouncedSearch || undefined,
+        destination: filters.destination || undefined,
+        activityType: filters.activityType || undefined,
+        date: filters.date || undefined,
+        currency: filters.currency || undefined,
+        minPrice: filters.minPrice || undefined,
+        maxPrice: filters.maxPrice || undefined,
+        minDuration: filters.minDuration || undefined,
+        maxDuration: filters.maxDuration || undefined,
+        sort: filters.sort,
+      })
+    );
+  };
+
+  const handleLoadMore = () => {
+    if (isLoadingTours) return;
+    if (!pagination?.hasNextPage) return;
+
+    setMobilePage((current) => current + 1);
+  };
 
   const handleSaveClick = async (tour: Tour) => {
     setSaveMessage("");
@@ -276,6 +399,7 @@ export default function ToursPage() {
 
   return (
     <main className="min-h-screen bg-white">
+      {/* Hero section */}
       <section className="border-b border-gray-100 bg-[#f8faf8]">
         <div className="mx-auto max-w-7xl px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-12 lg:px-8">
           <div className="mb-7">
@@ -292,7 +416,8 @@ export default function ToursPage() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:rounded-full sm:py-2 sm:pl-6 sm:pr-2">
+          {/* Original desktop search - unchanged */}
+          <div className="hidden flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:flex sm:flex-row sm:items-center sm:rounded-full sm:py-2 sm:pl-6 sm:pr-2">
             <div className="min-w-0 flex-1">
               <label
                 htmlFor="tour-search"
@@ -344,6 +469,56 @@ export default function ToursPage() {
         </div>
       </section>
 
+      {/* Mobile sticky search */}
+      <div className="sticky top-0 z-[999] border-b border-gray-100 bg-white/95 px-4 py-2.5 shadow-sm backdrop-blur-md sm:hidden">
+        <div className="flex h-11 items-center gap-2 rounded-full border border-gray-200 bg-[#f8faf8] px-3">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            className="h-4 w-4 shrink-0 text-gray-400"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-4-4" />
+          </svg>
+
+          <input
+            id="tour-search-mobile"
+            type="search"
+            value={filters.search}
+            onChange={(event) =>
+              updateFilter("search", event.target.value)
+            }
+            placeholder="Search experiences..."
+            aria-label="Search experiences"
+            className="min-w-0 flex-1 border-0 bg-transparent text-sm text-[#203b2a] outline-none placeholder:text-gray-400 focus:ring-0"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowFilters((current) => !current)}
+            aria-expanded={showFilters}
+            aria-controls="tour-filters"
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-[#245b3b] px-3.5 text-xs font-semibold text-white transition hover:bg-[#19452d]"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            >
+              <path d="M4 6h16M7 12h10m-7 6h4" />
+            </svg>
+            Filters
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
       <section
         id="tour-filters"
         className="border-b border-gray-100 bg-white"
@@ -522,6 +697,7 @@ export default function ToursPage() {
         </div>
       </section>
 
+      {/* Tours */}
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -533,7 +709,9 @@ export default function ToursPage() {
               <p className="mt-1 text-sm text-gray-500">
                 {totalCount === 0
                   ? "No experiences available"
-                  : `Showing ${showingFrom}–${showingTo} of ${totalCount.toLocaleString("en-IN")} experiences`}
+                  : isMobile
+                    ? `Showing ${mobileTours.length} of ${totalCount.toLocaleString("en-IN")} experiences`
+                    : `Showing ${showingFrom}–${showingTo} of ${totalCount.toLocaleString("en-IN")} experiences`}
               </p>
             )}
           </div>
@@ -554,96 +732,89 @@ export default function ToursPage() {
           </p>
         )}
 
-        {isLoadingTours && (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {/* Loading skeleton */}
+        {isLoadingTours && (!isMobile || mobileTours.length === 0) && (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="animate-pulse">
-                <div className="aspect-[4/3] rounded-2xl bg-gray-100" />
-                <div className="mt-4 h-4 w-3/4 rounded bg-gray-100" />
-                <div className="mt-3 h-3 w-1/2 rounded bg-gray-100" />
-                <div className="mt-3 h-3 w-full rounded bg-gray-100" />
+                <div className="aspect-[4/3] rounded-xl bg-gray-100 sm:rounded-2xl" />
+                <div className="mt-3 h-3 w-3/4 rounded bg-gray-100 sm:mt-4 sm:h-4" />
+                <div className="mt-2 h-3 w-1/2 rounded bg-gray-100 sm:mt-3" />
+                <div className="mt-2 hidden h-3 w-full rounded bg-gray-100 sm:mt-3 sm:block" />
               </div>
             ))}
           </div>
         )}
 
-        {!isLoadingTours && error && (
-          <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center">
-            <h3 className="font-semibold text-red-800">
-              Unable to load experiences
-            </h3>
-            <p className="mt-2 text-sm text-red-700">{error}</p>
-            <button
-              type="button"
-              onClick={() =>
-                dispatch(
-                  getPublishedTours({
-                    page,
-                    limit: PAGE_SIZE,
-                    search: debouncedSearch || undefined,
-                    destination: filters.destination || undefined,
-                    activityType: filters.activityType || undefined,
-                    date: filters.date || undefined,
-                    currency: filters.currency || undefined,
-                    minPrice: filters.minPrice || undefined,
-                    maxPrice: filters.maxPrice || undefined,
-                    minDuration: filters.minDuration || undefined,
-                    maxDuration: filters.maxDuration || undefined,
-                    sort: filters.sort,
-                  })
-                )
-              }
-              className="mt-4 rounded-full bg-[#245b3b] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#19452d]"
-            >
-              Try again
-            </button>
-          </div>
-        )}
+        {/* API error */}
+        {!isLoadingTours &&
+          error &&
+          (!isMobile || mobileTours.length === 0) && (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center">
+              <h3 className="font-semibold text-red-800">
+                Unable to load experiences
+              </h3>
 
-        {!isLoadingTours && !error && publicTours.length === 0 && (
-          <div className="rounded-2xl border border-gray-100 bg-[#f9faf9] px-5 py-16 text-center sm:py-20">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#eaf2ec] text-[#245b3b]">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                className="h-6 w-6"
-                aria-hidden="true"
+              <p className="mt-2 text-sm text-red-700">{error}</p>
+
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="mt-4 rounded-full bg-[#245b3b] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#19452d]"
               >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-4-4" />
-              </svg>
+                Try again
+              </button>
             </div>
+          )}
 
-            <h3 className="mt-4 text-lg font-semibold text-[#203b2a]">
-              No experiences found
-            </h3>
+        {/* No results */}
+        {!isLoadingTours &&
+          !error &&
+          displayedTours.length === 0 && (
+            <div className="rounded-2xl border border-gray-100 bg-[#f9faf9] px-5 py-16 text-center sm:py-20">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#eaf2ec] text-[#245b3b]">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  className="h-6 w-6"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-4-4" />
+                </svg>
+              </div>
 
-            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-gray-500">
-              Try another destination or change your filters to discover more experiences.
-            </p>
+              <h3 className="mt-4 text-lg font-semibold text-[#203b2a]">
+                No experiences found
+              </h3>
 
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="mt-5 rounded-full bg-[#245b3b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#19452d]"
-            >
-              Clear filters
-            </button>
-          </div>
-        )}
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-gray-500">
+                Try another destination or change your filters to discover more experiences.
+              </p>
 
-        {!isLoadingTours && !error && publicTours.length > 0 && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-5 rounded-full bg-[#245b3b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#19452d]"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+
+        {/* Tour cards */}
+        {!error && displayedTours.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-x-6 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {publicTours.map((tour) => {
+            <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-9 lg:grid-cols-3 xl:grid-cols-4">
+              {displayedTours.map((tour) => {
                 const isSaved = isTourSaved(tour._id);
                 const isPending = pendingTourId === tour._id;
 
                 return (
                   <article key={tour._id} className="group min-w-0">
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100 sm:rounded-2xl">
                       <Link
                         href={`/tours/${tour._id}`}
                         className="absolute inset-0"
@@ -655,16 +826,16 @@ export default function ToursPage() {
                             alt={tour.photos[0].alt || tour.title}
                             fill
                             unoptimized
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                             className="object-cover transition duration-500 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                          <div className="flex h-full items-center justify-center text-xs text-gray-400 sm:text-sm">
                             No image available
                           </div>
                         )}
 
-                        <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#245b3b] shadow-sm">
+                        <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-1 text-[9px] font-semibold text-[#245b3b] shadow-sm sm:left-3 sm:top-3 sm:px-3 sm:py-1.5 sm:text-xs">
                           {formatActivityType(tour.activityType)}
                         </span>
                       </Link>
@@ -672,7 +843,11 @@ export default function ToursPage() {
                       <button
                         type="button"
                         onClick={() => handleSaveClick(tour)}
-                        disabled={!initialized || isPending || pendingTourId !== null}
+                        disabled={
+                          !initialized ||
+                          isPending ||
+                          pendingTourId !== null
+                        }
                         aria-label={
                           isSaved ? "Remove from saved tours" : "Save tour"
                         }
@@ -682,11 +857,11 @@ export default function ToursPage() {
                             ? "Remove from saved tours"
                             : "Save this tour"
                         }
-                        className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gray-600 shadow-md transition hover:scale-110 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-gray-600 shadow-md transition hover:scale-110 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60 sm:right-3 sm:top-3 sm:h-10 sm:w-10"
                       >
                         {isPending ? (
                           <svg
-                            className="h-5 w-5 animate-spin"
+                            className="h-4 w-4 animate-spin sm:h-5 sm:w-5"
                             viewBox="0 0 24 24"
                             fill="none"
                             aria-hidden="true"
@@ -709,7 +884,7 @@ export default function ToursPage() {
                         ) : (
                           <svg
                             viewBox="0 0 24 24"
-                            className="h-5 w-5"
+                            className="h-4 w-4 sm:h-5 sm:w-5"
                             fill={isSaved ? "currentColor" : "none"}
                             stroke="currentColor"
                             strokeWidth="1.8"
@@ -727,30 +902,30 @@ export default function ToursPage() {
 
                     <Link
                       href={`/tours/${tour._id}`}
-                      className="block pt-4"
+                      className="block pt-2.5 sm:pt-4"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="line-clamp-1 text-[15px] font-semibold text-[#203b2a] transition group-hover:text-[#477b5b]">
+                      <div className="flex items-start justify-between gap-1.5 sm:gap-3">
+                        <h3 className="line-clamp-2 text-xs font-semibold leading-4 text-[#203b2a] transition group-hover:text-[#477b5b] sm:line-clamp-1 sm:text-[15px] sm:leading-normal">
                           {tour.title}
                         </h3>
 
-                        <span className="shrink-0 text-sm font-medium text-gray-700">
+                        <span className="shrink-0 text-[10px] font-medium text-gray-700 sm:text-sm">
                           {tour.durationHours}h
                         </span>
                       </div>
 
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 line-clamp-1 text-[10px] text-gray-500 sm:text-sm">
                         {tour.destination.city}
                         {tour.destination.state
                           ? `, ${tour.destination.state}`
                           : ""}
                       </p>
 
-                      <p className="mt-2 line-clamp-2 text-sm leading-5 text-gray-500">
+                      <p className="mt-2 hidden line-clamp-2 text-sm leading-5 text-gray-500 sm:block">
                         {tour.description}
                       </p>
 
-                      <p className="mt-3 text-sm text-[#203b2a]">
+                      <p className="mt-2 text-xs text-[#203b2a] sm:mt-3 sm:text-sm">
                         <span className="font-bold">
                           {formatPrice(
                             tour.price.amount,
@@ -765,10 +940,60 @@ export default function ToursPage() {
               })}
             </div>
 
+            {/* Mobile Load More */}
+            {isMobile && pagination?.hasNextPage && (
+              <div className="mt-8 flex flex-col items-center border-t border-gray-100 pt-6 sm:hidden">
+                <p className="mb-3 text-xs text-gray-500">
+                  Showing {mobileTours.length} of{" "}
+                  {totalCount.toLocaleString("en-IN")} experiences
+                </p>
+
+                <button
+                  type="button"
+                  disabled={isLoadingTours}
+                  onClick={handleLoadMore}
+                  className="flex h-11 min-w-40 items-center justify-center gap-2 rounded-full border border-[#245b3b] px-6 text-sm font-semibold text-[#245b3b] transition hover:bg-[#edf5ef] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isLoadingTours ? (
+                    <>
+                      <svg
+                        className="h-4 w-4 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          className="opacity-25"
+                        />
+                        <path
+                          d="M21 12a9 9 0 0 0-9-9"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      Load More
+                      <ChevronRight size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Desktop numbered pagination - unchanged */}
             {pagination && pagination.totalPages > 1 && (
               <nav
                 aria-label="Tour results pages"
-                className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-6 sm:flex-row"
+                className="mt-12 hidden flex-col items-center justify-between gap-4 border-t border-gray-100 pt-6 sm:flex sm:flex-row"
               >
                 <p className="text-sm text-gray-500">
                   Page{" "}
@@ -804,6 +1029,7 @@ export default function ToursPage() {
                       >
                         1
                       </button>
+
                       {pageNumbers[0] > 2 && (
                         <span className="px-1 text-gray-400">…</span>
                       )}
@@ -837,6 +1063,7 @@ export default function ToursPage() {
                         pagination.totalPages - 1 && (
                         <span className="px-1 text-gray-400">…</span>
                       )}
+
                       <button
                         type="button"
                         onClick={() => setPage(pagination.totalPages)}
@@ -866,6 +1093,7 @@ export default function ToursPage() {
         )}
       </section>
 
+      {/* Save tour modal */}
       {saveModal && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 py-6"
