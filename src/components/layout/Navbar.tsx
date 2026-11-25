@@ -28,7 +28,9 @@ export default function Navbar() {
     (state) => state.operator
   );
 
-  const { profile } = useAppSelector((state) => state.profile);
+  const { profile } = useAppSelector(
+    (state) => state.profile
+  );
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -92,93 +94,108 @@ export default function Navbar() {
     ? "/admin"
     : "/operator/dashboard";
 
+  const navLinkClass =
+    "whitespace-nowrap text-sm font-medium text-gray-700 transition-colors hover:text-[#245b3b]";
+
+  const mobileLinkClass =
+    "block rounded-lg px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-green-50 hover:text-[#245b3b]";
+
   return (
-    <header className="sticky top-0 z-[90] border-b border-gray-100 bg-white">
-      <nav className="relative mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-2 px-3 sm:px-5 md:px-7 lg:px-12">
+    <header className="sticky top-0 z-[90] w-full border-b border-gray-100 bg-white">
 
-        {/* Logo */}
-        <Link
-          href="/"
-          onClick={closeMenus}
-          className="flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2"
-        >
-          <Image
-            src="/traverse-logo.png"
-            alt="Traverse"
-            width={44}
-            height={44}
-            priority
-            className="h-9 w-9 shrink-0 object-contain sm:h-10 sm:w-10 lg:h-11 lg:w-11"
-          />
+      {/* Main Navbar */}
+      <nav className="relative mx-auto flex h-20 w-full max-w-[1440px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-10 xl:px-12">
 
-          <span className="text-lg font-semibold tracking-tight text-[#17452d] sm:text-xl lg:text-2xl">
-            Traverse
-          </span>
-        </Link>
+        {/* LEFT: Brand Logo */}
+        
+{/* LEFT: Brand Logo */}
+<Link
+  href="/"
+  onClick={closeMenus}
+  aria-label="Traverse home"
+  className="flex h-full shrink-0 items-center gap-2.5"
+>
+  {/* Logo Symbol */}
+  <span className="flex h-12 w-12 shrink-0 items-center justify-center sm:h-14 sm:w-14">
+    <Image
+      src="/traverse-logo-v2.png"
+      alt="Traverse"
+      width={56}
+      height={56}
+      priority
+      className="block h-full w-full object-contain"
+    />
+  </span>
 
-        {/* Desktop Navigation */}
-        <div className="hidden items-center gap-5 md:flex lg:gap-8">
-          <Link
-            href="/tours"
-            className="text-sm font-medium text-gray-700 transition hover:text-[#245b3b] lg:text-base"
-          >
-            Explore
-          </Link>
+  {/* Brand Name */}
+  <span className="relative top-[1px] whitespace-nowrap font-[family-name:var(--font-league-spartan)] text-xl font-bold uppercase leading-none tracking-[-0.035em] text-[#17452d] sm:text-2xl">
+    TRAVERSE
+  </span>
+</Link>
 
-          {/* Admin and Approved Operator Dashboard */}
-          {initialized &&
-            isAuthenticated &&
-            (isAdmin || isApprovedOperator) && (
-              <Link
-                href={dashboardHref}
-                className="text-sm font-semibold text-[#245b3b] transition hover:text-[#17452d] lg:text-base"
-              >
-                Dashboard
-              </Link>
+
+        {/* CENTER: Desktop Navigation */}
+        <div className="hidden min-w-0 flex-1 items-center justify-center lg:flex">
+          <div className="flex items-center gap-6 xl:gap-9">
+
+            <Link href="/tours" className={navLinkClass}>
+              Explore
+            </Link>
+
+            {/* Admin and Approved Operator */}
+            {initialized &&
+              isAuthenticated &&
+              (isAdmin || isApprovedOperator) && (
+                <Link
+                  href={dashboardHref}
+                  className="whitespace-nowrap text-sm font-semibold text-[#245b3b] transition hover:text-[#17452d]"
+                >
+                  Dashboard
+                </Link>
+              )}
+
+            {/* Traveler Navigation */}
+            {initialized && isAuthenticated && isTraveler && (
+              <>
+                <Link
+                  href="/saved-tours"
+                  className={navLinkClass}
+                >
+                  Saved Tours
+                </Link>
+
+                <Link
+                  href="/my-bookings"
+                  className={navLinkClass}
+                >
+                  My Bookings
+                </Link>
+              </>
             )}
 
-          {/* Traveler Navigation */}
-          {initialized && isAuthenticated && isTraveler && (
-            <>
-              <Link
-                href="/saved-tours"
-                className="text-sm font-medium text-gray-700 transition hover:text-[#245b3b] lg:text-base"
-              >
-                Saved Tours
-              </Link>
+            <Link href="/about" className={navLinkClass}>
+              About
+            </Link>
 
-              <Link
-                href="/my-bookings"
-                className="text-sm font-medium text-gray-700 transition hover:text-[#245b3b] lg:text-base"
-              >
-                My Bookings
-              </Link>
-            </>
-          )}
-
-          <Link
-            href="/about"
-            className="text-sm font-medium text-gray-700 transition hover:text-[#245b3b] lg:text-base"
-          >
-            About
-          </Link>
+          </div>
         </div>
 
-        {/* Right Side */}
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        {/* RIGHT: Account Actions */}
+        <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-3">
 
           {/* Authentication Loading */}
           {!initialized ? (
             <div className="h-9 w-24 animate-pulse rounded-full bg-gray-100" />
           ) : isAuthenticated && user ? (
-            /* Logged-in Profile Link */
+
+            /* Logged-in Profile */
             <Link
               href="/profile"
               onClick={closeMenus}
               aria-label="Go to my profile"
-              className="flex max-w-[155px] items-center gap-2 rounded-full border border-gray-200 py-1 pl-1 pr-2 transition hover:border-[#9bb9a2] hover:bg-gray-50 sm:max-w-[210px] sm:gap-2.5 sm:pr-3"
+              className="flex max-w-[155px] shrink-0 items-center gap-2 rounded-full border border-gray-200 py-1 pl-1 pr-2 transition hover:border-[#9bb9a2] hover:bg-gray-50 sm:max-w-[210px] sm:gap-2.5 sm:pr-3"
             >
-              <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5f3e9] text-xs font-semibold text-[#245b3b] sm:h-9 sm:w-9">
+              <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5f3e9] text-xs font-semibold text-[#245b3b]">
                 {profilePhoto ? (
                   <Image
                     src={profilePhoto}
@@ -197,12 +214,15 @@ export default function Navbar() {
                 {displayName}
               </span>
             </Link>
+
           ) : (
+
             /* Guest Desktop Actions */
-            <>
+            <div className="hidden items-center gap-5 lg:flex xl:gap-7">
+
               <Link
                 href="/operator-register"
-                className="hidden items-center gap-2 whitespace-nowrap border-r border-gray-300 pr-5 text-sm font-semibold text-black transition hover:text-[#245b3b] md:flex lg:pr-7"
+                className="flex items-center gap-2 whitespace-nowrap border-r border-gray-200 pr-5 text-sm font-semibold text-gray-900 transition hover:text-[#245b3b] xl:pr-7"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -229,18 +249,19 @@ export default function Navbar() {
 
               <Link
                 href="/login"
-                className="hidden whitespace-nowrap text-sm font-medium text-gray-700 transition hover:text-[#245b3b] md:block"
+                className="whitespace-nowrap text-sm font-medium text-gray-700 transition hover:text-[#245b3b]"
               >
                 Log in
               </Link>
 
               <Link
                 href="/register"
-                className="hidden whitespace-nowrap rounded-full bg-[#245b3b] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#19452d] md:block lg:px-5"
+                className="whitespace-nowrap rounded-full bg-[#245b3b] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#19452d]"
               >
                 Register
               </Link>
-            </>
+
+            </div>
           )}
 
           {/* Mobile Menu Button */}
@@ -249,7 +270,7 @@ export default function Navbar() {
             onClick={() => setMobileMenuOpen((open) => !open)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileMenuOpen}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-700 transition hover:bg-gray-100 md:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-700 transition hover:bg-gray-100 lg:hidden"
           >
             {mobileMenuOpen ? (
               <svg
@@ -279,27 +300,30 @@ export default function Navbar() {
               </svg>
             )}
           </button>
+
         </div>
       </nav>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <>
+          {/* Backdrop */}
           <button
             type="button"
             aria-label="Close navigation menu"
             onClick={closeMenus}
-            className="fixed inset-0 top-[72px] z-30 bg-black/10 md:hidden"
+            className="fixed inset-0 top-20 z-30 bg-black/10 lg:hidden"
           />
 
-          <div className="absolute left-0 right-0 top-full z-40 border-t border-gray-100 bg-white px-4 pb-5 pt-3 shadow-lg md:hidden sm:px-6">
+          {/* Dropdown */}
+          <div className="absolute left-0 right-0 top-full z-40 border-t border-gray-100 bg-white px-4 pb-5 pt-3 shadow-lg sm:px-6 lg:hidden">
+
             <div className="flex flex-col gap-1">
 
-              {/* Explore */}
               <Link
                 href="/tours"
                 onClick={closeMenus}
-                className="rounded-lg px-3 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#245b3b]"
+                className={mobileLinkClass}
               >
                 Explore
               </Link>
@@ -311,7 +335,7 @@ export default function Navbar() {
                   <Link
                     href={dashboardHref}
                     onClick={closeMenus}
-                    className="rounded-lg bg-green-50 px-3 py-3 text-sm font-semibold text-[#245b3b] transition hover:bg-green-100"
+                    className="block rounded-lg bg-green-50 px-4 py-3 text-sm font-semibold text-[#245b3b] transition hover:bg-green-100"
                   >
                     Dashboard
                   </Link>
@@ -323,7 +347,7 @@ export default function Navbar() {
                   <Link
                     href="/saved-tours"
                     onClick={closeMenus}
-                    className="rounded-lg px-3 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#245b3b]"
+                    className={mobileLinkClass}
                   >
                     Saved Tours
                   </Link>
@@ -331,21 +355,21 @@ export default function Navbar() {
                   <Link
                     href="/my-bookings"
                     onClick={closeMenus}
-                    className="rounded-lg px-3 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#245b3b]"
+                    className={mobileLinkClass}
                   >
                     My Bookings
                   </Link>
                 </>
               )}
 
-              {/* About */}
               <Link
                 href="/about"
                 onClick={closeMenus}
-                className="rounded-lg px-3 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 hover:text-[#245b3b]"
+                className={mobileLinkClass}
               >
                 About
               </Link>
+
             </div>
 
             {/* Authenticated Mobile Account */}
@@ -402,10 +426,11 @@ export default function Navbar() {
                 <div className="my-3 border-t border-gray-100" />
 
                 <div className="flex flex-col gap-2">
+
                   <Link
                     href="/operator-register"
                     onClick={closeMenus}
-                    className="flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-gray-50"
+                    className="flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -445,12 +470,15 @@ export default function Navbar() {
                   >
                     Register
                   </Link>
+
                 </div>
               </>
             )}
+
           </div>
         </>
       )}
+
     </header>
   );
 }

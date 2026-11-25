@@ -61,7 +61,6 @@ const initialState: AuthState = {
   error: null,
 };
 
-// Register traveler and automatically authenticate.
 export const registerUser = createAsyncThunk<
   User,
   RegisterData,
